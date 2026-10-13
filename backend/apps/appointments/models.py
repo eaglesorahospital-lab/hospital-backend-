@@ -129,7 +129,7 @@ class Appointment(models.Model):
         ]
         constraints = [
             models.CheckConstraint(
-                check=Q(end_time__gt=F('start_time')),
+                condition=Q(end_time__gt=F('start_time')),
                 name='apt_end_time_after_start_time',
             ),
         ]

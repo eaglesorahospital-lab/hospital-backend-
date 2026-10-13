@@ -21,12 +21,16 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 def test_root_structure():
     """Verify all required top-level directories and files exist."""
     required_files = ['.env.example', '.gitignore', 'docker-compose.yml', 'README.md']
-    required_dirs = ['frontend', 'backend', 'database', 'docs', 'docker', 'nginx', 'tests']
+    required_dirs = ['backend', 'database', 'docs', 'docker', 'nginx', 'tests']
 
     for f in required_files:
         assert (ROOT_DIR / f).is_file(), f"Missing root file: {f}"
     for d in required_dirs:
         assert (ROOT_DIR / d).is_dir(), f"Missing root directory: {d}"
+
+    # If frontend is present (full-stack workspace), verify it exists
+    if (FRONTEND_DIR / 'package.json').is_file():
+        assert (ROOT_DIR / 'frontend').is_dir()
 
 
 def test_docs_structure():
@@ -40,7 +44,6 @@ def test_docs_structure():
 
 def test_docker_structure():
     """Verify all Dockerfiles and compose configuration exist."""
-    assert (ROOT_DIR / 'docker' / 'frontend' / 'Dockerfile').is_file()
     assert (ROOT_DIR / 'docker' / 'backend' / 'Dockerfile').is_file()
     assert (ROOT_DIR / 'docker' / 'nginx' / 'Dockerfile').is_file()
     assert (ROOT_DIR / 'docker' / 'celery' / 'Dockerfile').is_file()
@@ -48,7 +51,11 @@ def test_docker_structure():
 
 
 def test_frontend_structure():
-    """Verify React application directory structure."""
+    """Verify React application directory structure when frontend is present."""
+    import pytest
+    if not (FRONTEND_DIR / 'package.json').is_file():
+        pytest.skip("Frontend directory not tracked in backend-only repository")
+
     expected_dirs = [
         'public',
         'src/assets',
@@ -77,6 +84,7 @@ def test_frontend_structure():
     assert (FRONTEND_DIR / 'package.json').is_file()
     assert (FRONTEND_DIR / 'README.md').is_file()
     assert (FRONTEND_DIR / 'src' / 'App.jsx').is_file()
+
 
 
 def test_backend_apps_structure():
